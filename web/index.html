@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>วัดมุมจากรูป · Angle Meter</title>
+  <meta name="description" content="อัปโหลดรูปแล้วคลิก 3 จุดเพื่อวัดมุมเป็นองศา ทำงานในเบราว์เซอร์ทั้งหมด รูปไม่ถูกส่งออกจากเครื่อง">
+  <meta name="theme-color" content="#15181d">
+  <meta property="og:title" content="วัดมุมจากรูป · Angle Meter">
+  <meta property="og:description" content="อัปโหลดรูปแล้วคลิก 3 จุดเพื่อวัดมุมเป็นองศา">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#0072BD"/>
+        <path d="M14 48H52M14 48L44 16" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M30 48A16 16 0 0 0 24.9 36.3" stroke="#EDB120" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <circle cx="14" cy="48" r="5" fill="#fff"/>
+      </svg>
+      <div>
+        <h1>วัดมุมจากรูป</h1>
+        <p>คลิก 3 จุดต่อ 1 มุม: จุดยอด → ปลายแขน 1 → ปลายแขน 2</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" type="button" data-open>
+      <svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+      เลือกรูป
+    </button>
+  </header>
+  <input id="fileInput" type="file" accept="image/*" hidden>
+
+  <main class="layout">
+    <section id="stage" class="stage" aria-label="พื้นที่วัดมุม">
+      <canvas id="canvas"></canvas>
+
+      <div id="empty" class="empty">
+        <div class="empty-card">
+          <svg class="i empty-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+          <h2>ลากรูปมาวางที่นี่</h2>
+          <p>หรือเลือกไฟล์จากเครื่อง / ถ่ายรูปจากมือถือ</p>
+          <div class="empty-actions">
+            <button class="btn btn-primary" type="button" data-open>เลือกรูป</button>
+            <button class="btn" type="button" data-sample>ลองกับภาพตัวอย่าง</button>
+          </div>
+          <p class="fine">วางรูปจากคลิปบอร์ดด้วย Ctrl+V ได้ · รูปประมวลผลในเบราว์เซอร์ ไม่ถูกอัปโหลด</p>
+        </div>
+      </div>
+
+      <div id="prompt" class="prompt" hidden aria-live="polite">
+        <span id="promptDots" class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span id="promptText"></span>
+      </div>
+
+      <div id="toolbar" class="toolbar" hidden>
+        <button id="btnUndo" type="button" title="ย้อนกลับ (Ctrl+Z)">
+          <svg class="i" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+          <span class="label">ย้อนกลับ</span>
+        </button>
+        <span class="sep"></span>
+        <button id="btnZoomOut" type="button" title="ซูมออก (−)" aria-label="ซูมออก">
+          <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
+        </button>
+        <button id="btnZoomIn" type="button" title="ซูมเข้า (+)" aria-label="ซูมเข้า">
+          <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>
+        </button>
+        <button id="btnFit" type="button" title="พอดีจอ (0)" aria-label="พอดีจอ">
+          <svg class="i" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </button>
+        <span class="sep"></span>
+        <button id="btnLoupe" type="button" title="แว่นขยาย" aria-pressed="true">
+          <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg>
+          <span class="label">แว่นขยาย</span>
+        </button>
+      </div>
+
+      <div id="toast" class="toast" role="status" hidden></div>
+    </section>
+
+    <aside class="panel">
+      <section class="card">
+        <div class="card-head">
+          <h2>ผลการวัด</h2>
+          <span id="count" class="badge">0 มุม</span>
+        </div>
+        <p id="imgInfo" class="img-info" hidden></p>
+        <div id="results"></div>
+        <div class="actions">
+          <button id="btnPng" class="btn" type="button" disabled>
+            <svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            บันทึกรูป PNG
+          </button>
+          <button id="btnCsv" class="btn" type="button" disabled>
+            <svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            ดาวน์โหลด CSV
+          </button>
+          <button id="btnClear" class="btn btn-ghost" type="button" disabled>ล้างทั้งหมด</button>
+        </div>
+      </section>
+
+      <details class="card" open>
+        <summary>วิธีใช้</summary>
+        <ol class="help">
+          <li>เลือกรูป ลากรูปมาวาง หรือวางจากคลิปบอร์ด</li>
+          <li>คลิก <b>จุดยอดมุม</b> → <b>ปลายแขนข้างที่ 1</b> → <b>ปลายแขนข้างที่ 2</b></li>
+          <li>วัดมุมต่อไปได้เรื่อย ๆ ผลจะขึ้นในรายการด้านบน</li>
+        </ol>
+        <ul class="help tips">
+          <li>ลากจุดที่วางแล้วเพื่อปรับตำแหน่ง ค่ามุมจะอัปเดตทันที</li>
+          <li>คลิกบนจุดเดิมเพื่อใช้จุดร่วมกัน เช่น มุมทั้งสามของสามเหลี่ยม จุดร่วมจะขยับไปด้วยกันเมื่อลาก</li>
+          <li>ซูมด้วยล้อเมาส์หรือหนีบสองนิ้ว เลื่อนภาพด้วยการลากที่ว่างหรือใช้สองนิ้ว</li>
+          <li>บนมือถือ แตะค้างแล้วเลื่อนนิ้วเล็งด้วยแว่นขยาย ปล่อยนิ้วเพื่อวางจุด</li>
+        </ul>
+        <p class="keys"><kbd>Ctrl</kbd>+<kbd>Z</kbd> ย้อนกลับ · <kbd>Esc</kbd> ยกเลิกมุมที่กำลังวัด · <kbd>+</kbd> <kbd>−</kbd> ซูม · <kbd>0</kbd> พอดีจอ</p>
+      </details>
+
+      <details class="card">
+        <summary>หลักการคำนวณ</summary>
+        <div class="help">
+          <p>ให้ V เป็นจุดยอด และ P1, P2 เป็นปลายแขน สร้างเวกเตอร์ u = P1 − V และ v = P2 − V</p>
+          <p class="formula">u·v = |u||v| cos θ<br>|u×v| = |u||v| sin θ<br>θ = atan2(|u×v|, u·v)</p>
+          <p>ใช้ atan2 แทน acos(u·v / |u||v|) เพราะแม่นยำกว่าเมื่อมุมใกล้ 0° หรือ 180° ผลลัพธ์อยู่ในช่วง 0–180° เสมอ</p>
+        </div>
+      </details>
+
+      <p class="footnote">พอร์ตจากโปรเจกต์ MATLAB <code>measure_angle.m</code> · พิกัดแบบ MATLAB (พิกเซลแรก = 1)</p>
+    </aside>
+  </main>
+
+  <div id="dropOverlay" class="drop-overlay" hidden><span>วางรูปเพื่อเริ่มวัด</span></div>
+</body>
+</html>

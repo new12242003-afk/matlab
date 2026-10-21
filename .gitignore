@@ -1,0 +1,16 @@
+# MATLAB
+*.asv
+*.m~
+slprj/
+
+# Node / deploy tools
+node_modules/
+.vercel/
+.railway/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.claude/settings.local.json
