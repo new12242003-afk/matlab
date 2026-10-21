@@ -33,7 +33,7 @@ demo_measure_angle              % สาธิต + เทียบกับม�
 
 ## เวอร์ชันเว็บ (`web/`)
 
-เว็บไซต์ static (HTML/CSS/JS ล้วน ไม่มี build step ไม่มี framework) deploy บน Railway จาก GitHub: `Staticfile` ที่รากโปรเจกต์ (`root: web`) ทำให้ Railpack เสิร์ฟ `web/` ด้วย Caddy ข้อจำกัดเรื่อง Toolbox ใช้กับฝั่ง MATLAB เท่านั้น
+เว็บไซต์ static (HTML/CSS/JS ล้วน ไม่มี build step ไม่มี framework) deploy จาก GitHub ได้ทั้งสองที่ โดยต้องชี้ไปที่ `web/` เพราะรากโปรเจกต์ไม่มี `index.html`: Railway ใช้ `Staticfile` (`root: web`, Railpack + Caddy) ส่วน Vercel ใช้ `vercel.json` (`outputDirectory: "web"`) ข้อจำกัดเรื่อง Toolbox ใช้กับฝั่ง MATLAB เท่านั้น
 
 Caddy ของ Railpack ใส่ CSP ที่ `img-src` ไม่อนุญาต `blob:` จึงต้องโหลดรูปที่ผู้ใช้เลือกเป็น `data:` URL (`readAsDataUrl` ใน `app.js`) ห้ามเปลี่ยนกลับไปใช้ `URL.createObjectURL` กับ `<img>` (ใช้ blob กับลิงก์ดาวน์โหลดได้ เพราะ CSP ไม่บล็อกการดาวน์โหลด)
 

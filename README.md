@@ -30,6 +30,9 @@ node --test web/angle.test.mjs     # ทดสอบแกนคำนวณ
 2. เมื่อ deploy เสร็จ ไปที่ **Settings → Networking → Generate Domain** เพื่อรับลิงก์ `*.up.railway.app`
 3. หลังจากนั้นทุกครั้งที่ push ขึ้น GitHub ระบบจะ deploy ใหม่ให้อัตโนมัติ
 
+### Deploy บน Vercel
+ไฟล์ `vercel.json` ที่รากโปรเจกต์ตั้ง `outputDirectory` เป็น `web` (ถ้าไม่มี Vercel จะเสิร์ฟรากโปรเจกต์ซึ่งไม่มี `index.html` แล้วขึ้น 404) import repo นี้ที่ [vercel.com/new](https://vercel.com/new) ได้เลยโดยไม่ต้องตั้ง Root Directory
+
 ## ไฟล์ในโปรเจกต์
 | ไฟล์ | หน้าที่ |
 |---|---|
@@ -42,6 +45,7 @@ node --test web/angle.test.mjs     # ทดสอบแกนคำนวณ
 | `web/angle.js` | สูตรคำนวณมุมและภาพสามเหลี่ยมทดสอบ (พอร์ตจากไฟล์ `.m`) |
 | `web/angle.test.mjs` | ทดสอบ `web/angle.js` ด้วย `node --test` |
 | `Staticfile` | ตั้งค่า Railway ให้เสิร์ฟโฟลเดอร์ `web/` |
+| `vercel.json` | ตั้งค่า Vercel ให้เสิร์ฟโฟลเดอร์ `web/` |
 
 ## หลักการคำนวณ
 ให้ V เป็นจุดยอด และ P1, P2 เป็นปลายแขน สร้างเวกเตอร์ u = P1 − V และ v = P2 − V
